@@ -4,6 +4,7 @@ import {BrowserRouter} from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { createStore, compose, applyMiddleware, combineReducers } from 'redux';
 import thunk from 'redux-thunk';
+import createSagaMiddleware from 'redux-saga';
 
 import './index.css';
 import App from './App';
@@ -11,6 +12,7 @@ import * as serviceWorker from './serviceWorker';
 import burgerBuilderReducer from './store/reducers/burgerBuilder';
 import orderReducer from './store/reducers/order';
 import authReducer from './store/reducers/auth';
+import { watchAuth, watchBurgerBuilder, watchOrders } from './store/sagas/index'
 
 require('dotenv').config();
 
@@ -22,9 +24,15 @@ const rootReducer = combineReducers({
   auth: authReducer
 })
 
+const sagaMiddleWare = createSagaMiddleware();
+
 const store = createStore(rootReducer, composeEnhancers(
-  applyMiddleware(thunk)
+  applyMiddleware(thunk, sagaMiddleWare)
 ));
+
+sagaMiddleWare.run(watchAuth);
+sagaMiddleWare.run(watchBurgerBuilder);
+sagaMiddleWare.run(watchOrders);
 
 const app = (
   <Provider store={store}>
